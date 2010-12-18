@@ -2,8 +2,8 @@ require 'java'
 
 module Redcar
   module SyntaxCheck
-    class MirahCheck < Checker
-      supported_grammars "Ruby"
+    class Mirah < Checker
+      supported_grammars "Mirah"
       
       require 'mirah-parser.jar'
       import 'mirah.impl.MirahParser'
@@ -21,15 +21,15 @@ module Redcar
         end
 
         def warning(messages, positions)
-          messages.length.times { |i|
-            problem "Warning: #{messages[i]} #{positions[i]}"             
-          }
+          messages.zip(positions).each do |message, position|
+            problem "Warning: #{message} #{position}"             
+          end
         end
 
         def error(messages, positions)
-          messages.length.times { |i|
-            problem "Warning: #{messages[i]} #{positions[i]}"              
-          }
+          messages.zip(positions).each do |message, position|
+            problem "Warning: #{message} #{position}"             
+          end
         end
       end
       
@@ -40,8 +40,7 @@ module Redcar
         parser = MirahParser.new
         parser.filename = path
         # If you want to get warnings
-        handler = MyErrorHandler.new
-        parser.errorHandler = handler
+        parser.errorHandler = MyErrorHandler.new
         
         begin
           parser.parse(IO.read(path))
@@ -58,6 +57,7 @@ module Redcar
             SyntaxCheck::Error.new(doc, info[1].to_i-1, problem.split(" (").first).annotate
           end
         }
+      end
     end
   end
 end
